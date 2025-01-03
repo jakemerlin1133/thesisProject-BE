@@ -6,7 +6,8 @@ urlpatterns = [
     # User's URL
    path('users/', views.user_list),
    path('users/<int:id>', views.user_detail),
-   path('login/', views.login),
+   path('login/', views.user_login),
+   path('logout/', views.user_logout),
    
     # Categories' URL
    path('categories/', views.category_list),

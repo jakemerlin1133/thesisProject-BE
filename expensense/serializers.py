@@ -26,7 +26,11 @@ class UserSerializer(serializers.ModelSerializer):
             'email', 
             'phone_number',
             'uploaded_at',
-            'updated_at'
+            'updated_at',
+             'last_login', 
+            'is_active',   
+            'is_staff',  
+            'is_superuser'
         ]
        
     def create(self, validated_data):

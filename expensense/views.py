@@ -10,12 +10,14 @@ from .serializers import StoreSerializer
 from .models import Expense
 from .serializers import ExpenseSerializer
 
-
+from django.http import HttpResponse
 from rest_framework import status
+from django.contrib.auth import login, logout
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.contrib.auth.hashers import check_password
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.sessions.models import Session
 
 import cv2
 import easyocr
@@ -390,7 +392,7 @@ def predict_next_month_total(model, df):
 
 @csrf_exempt
 @api_view(['POST'])
-def login(request):
+def user_login(request):
     user_name = request.data.get('user_name')
     password = request.data.get('password')
 
@@ -404,6 +406,13 @@ def login(request):
     if not check_password(password, user.password):
         return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    try:
+        login(request, user) 
+        print(request.session)
+    except Exception as e:
+        return Response({"error": f"Login failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
     # If authentication is successful, respond with user details
     return Response({
         "message": "Login successful",
@@ -415,4 +424,9 @@ def login(request):
             "last_name": user.last_name
         }
     }, status=status.HTTP_200_OK)
-    
+
+
+def user_logout(request):
+        logout(request)
+        return HttpResponse("Logout session successful")
+       
