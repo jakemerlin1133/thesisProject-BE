@@ -10,7 +10,7 @@ from .serializers import StoreSerializer
 from .models import Expense
 from .serializers import ExpenseSerializer
 
-from django.http import HttpResponse
+from django.http import JsonResponse
 from rest_framework import status
 from django.contrib.auth import login, logout
 from rest_framework.response import Response
@@ -428,5 +428,5 @@ def user_login(request):
 
 def user_logout(request):
         logout(request)
-        return HttpResponse("Logout session successful")
+        return JsonResponse({"message": "Logout successful"}, status=200)
        
