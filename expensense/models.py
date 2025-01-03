@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class User(models.Model):
+class AppUser(models.Model):
     user_name = models.CharField(max_length=16)
     password = models.CharField(max_length=255)
     first_name = models.CharField(max_length=24)
@@ -33,7 +33,7 @@ class Store(models.Model):
     category_id = models.ForeignKey(Category, on_delete=models.CASCADE)
            
 class Expense(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    user_id = models.ForeignKey(AppUser, on_delete=models.CASCADE, default=1)
     file = models.FileField()
     matched_store =  models.JSONField(null=True, blank=True)
     matched_store_category =  models.JSONField(null=True, blank=True)

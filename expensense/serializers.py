@@ -1,18 +1,18 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 
-from .models import User
+from .models import AppUser
 from .models import Category
 from .models import Store
 from .models import Expense
 
-class UserSerializer(serializers.ModelSerializer):
+class AppUserSerializer(serializers.ModelSerializer):
     birthdate = serializers.DateField(
         format="%B %d, %Y", 
         input_formats=["%B %d, %Y", "%B, %d, %Y", "%Y-%m-%d"]
     )
     class Meta:
-        model = User
+        model = AppUser
         fields = [
             'id', 
             'user_name', 

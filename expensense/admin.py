@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from .models import User
+from .models import AppUser
 from .models import Category
 from .models import Store
 from .models import Expense
 
-class UserAdmin(admin.ModelAdmin):
+class AppUserAdmin(admin.ModelAdmin):
     list_display = ('id', 'user_name', 'password', 'first_name', 'middle_name', 'last_name', 'birthdate', 'age', 'position', 'email', 'phone_number', 'uploaded_at', 'updated_at')
 
 class ExpenseAdmin(admin.ModelAdmin):
@@ -19,7 +19,7 @@ class StoreAdmin(admin.ModelAdmin):
 
 # Register your models here.
 
-admin.site.register(User, UserAdmin)
+admin.site.register(AppUser, AppUserAdmin)
 admin.site.register(Category, CatergoryAdmin)
 admin.site.register(Store, StoreAdmin)
 admin.site.register(Expense, ExpenseAdmin)
