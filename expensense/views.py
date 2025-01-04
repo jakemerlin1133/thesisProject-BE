@@ -10,19 +10,12 @@ from .serializers import StoreSerializer
 from .models import Expense
 from .serializers import ExpenseSerializer
 
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import status
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.sessions.models import Session
-
-
 
 import cv2
 import easyocr
@@ -57,8 +50,8 @@ def user_list(request):
 def user_detail(request, id):
     
     try:
-       user = User.objects.get(pk=id)
-    except User.DoesNotExist:
+       user = AppUser.objects.get(pk=id)
+    except AppUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
@@ -395,7 +388,6 @@ def predict_next_month_total(model, df):
     return round(prediction[0], 2)
 
 
-@csrf_exempt
 @api_view(['POST'])
 def user_login(request):
     user_name = request.data.get('user_name')
@@ -403,8 +395,8 @@ def user_login(request):
 
     # Check if the user exists
     try:
-        user = User.objects.get(user_name=user_name)
-    except User.DoesNotExist:
+        user = AppUser.objects.get(user_name=user_name)
+    except AppUser.DoesNotExist:
         return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
     # Validate the password
