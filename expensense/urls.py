@@ -18,8 +18,8 @@ urlpatterns = [
     path('stores/<int:id>',views.store_detail),
     
     # Expense's URL
-    path('expense/', views.expense_list),
-    path('expense/<int:id>/', views.expense_detail),
+    path('expense/<int:user_id>/', views.expense_list),
+    path('expense/<int:user_id>/<int:id>/', views.expense_detail),
     path('expense/predict/<int:user_id>/', views.expense_prediction),
     
 

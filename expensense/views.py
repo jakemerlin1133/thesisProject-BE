@@ -144,11 +144,11 @@ def store_detail(request, id):
     
     
 @api_view(['GET', 'POST'])
-def expense_list(request):
+def expense_list(request, user_id):
     if request.method == "GET":
         
-        ocr = Expense.objects.all()
-        serializer = ExpenseSerializer(ocr, many=True)
+        expenses = Expense.objects.filter(user_id=user_id)
+        serializer = ExpenseSerializer(expenses, many=True)
         return Response(serializer.data)
     
     if request.method == "POST":
@@ -259,7 +259,7 @@ def expense_list(request):
                 matched_category_str = ", ".join(matched_category)
                 
                 data = {
-                    'user_id': request.data.get('user_id'),
+                    'user_id': user_id,
                     'file': image_file,
                     'matched_store': matched_store_str,
                     'matched_store_category': matched_category_str,
@@ -278,9 +278,9 @@ def expense_list(request):
       
     
 @api_view(['GET', 'PUT', 'DELETE'])
-def expense_detail(request, id):
+def expense_detail(request, user_id, id):
     try: 
-        ocr = Expense.objects.get(pk=id)
+        ocr = Expense.objects.get(pk=id, user_id=user_id)
     except Expense.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
