@@ -333,7 +333,7 @@ def expense_prediction(request, user_id):
             next_month_name = datetime(next_year, next_month, 1).strftime("%B %Y")
             
             return Response({
-                "prediction": f"Expected expenses for {next_month_name}: {predicted_expense}"
+                "prediction":{predicted_expense}
             }, status=status.HTTP_200_OK)   
             
         except Exception as e:
