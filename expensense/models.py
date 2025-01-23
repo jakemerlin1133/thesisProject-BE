@@ -34,7 +34,7 @@ class Store(models.Model):
            
 class Expense(models.Model):
     user_id = models.ForeignKey(AppUser, on_delete=models.CASCADE, default=1)
-    file = models.FileField()
+    file = models.FileField(null=True, blank=True)
     matched_store =  models.JSONField(null=True, blank=True)
     matched_store_category =  models.JSONField(null=True, blank=True)
     total_value = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
