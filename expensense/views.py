@@ -152,128 +152,88 @@ def expense_list(request, user_id):
         return Response(serializer.data)
     
     if request.method == "POST":
-          normalize_total = ["total", "tctal", "tofal", "tota"]       
-          file = request.FILES.get('file')
-          if file:
-            try:
+        try:
+            normalize_total = ["total", "tctal", "tofal", "tota"]
+            file = request.FILES.get('file')
+            total_value = request.data.get('total_value', None)
+            matched_store = request.data.get('matched_store', None)
+            matched_category = ["Others"]
+            
+            if file:
+                # OCR processing logic for the image file
                 image = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
-                
                 reader = easyocr.Reader(['en'], gpu=False)
                 result = reader.readtext(image, detail=1, paragraph=False)
-                
-                  # Add bounding boxes and detected text
-                for detection in result:
-                    top_left = tuple(map(int, detection[0][0]))
-                    bottom_right = tuple(map(int, detection[0][2]))
-                    text = detection[1].replace('$', '')  # Clean text, remove dollar sign
 
-                    # Draw the bounding box around the detected text
-                    image = cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
-
-                    # Put the detected text above the bounding box
-                    image = cv2.putText(image, text, top_left, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                
-                # Encode image as PNG
-                _, img_encoded = cv2.imencode('.png', image)
-                # Create a file-like object with a filename (important for saving)
-                image_filename = f"image_with_bounding_boxes_{get_random_string(8)}.png"
-                image_file = ContentFile(img_encoded.tobytes(), name=image_filename)
-                        
                 detected_texts = [detection[1].replace('$', '').lower() for detection in result]
-                cleaned_texts = [word.replace(", uu", "").replace(".j0", "").rstrip('.,:;\'"-!?}]') for word in detected_texts]
-                
-                total_value = None
-                if any(word in cleaned_texts for word in normalize_total):
-                    index_of_total = next((i for i, word in enumerate(cleaned_texts) if word in normalize_total), None)
-                    if index_of_total is not None and index_of_total + 1 < len(cleaned_texts):
-                        word_after_total = cleaned_texts[index_of_total + 1]
-                        cleaned_value = word_after_total.replace('s', '').replace(',', '').replace(' ', '').replace('$', '')
-                        
-                        if index_of_total + 2 < len(cleaned_texts):
-                            next_value = cleaned_texts[index_of_total + 2].replace('$', '').replace(',', '').replace(' ', '').replace('s', '')
-                            if next_value.isdigit():
-                                cleaned_value += '.' + next_value  
-                        
-                        try:
-                            total_value = Decimal(cleaned_value)
-                        except:
-                            total_value = None
-                            
-                if total_value is None:
-                    for i, word in enumerate(cleaned_texts):
-                            if word == 'total':
-                                if i + 1 < len(cleaned_texts) and cleaned_texts[i + 1].isdigit() and i + 2 < len(cleaned_texts) and cleaned_texts[i + 2].isdigit():
-                                    total_value = Decimal(cleaned_texts[i + 1] + '.' + cleaned_texts[i + 2])
-                                    break
+                cleaned_texts = [
+                    word.replace(", uu", "").replace(".j0", "").rstrip('.,:;\'"-!?}]')
+                    for word in detected_texts
+                ]
 
-                                elif i + 1 < len(cleaned_texts) and cleaned_texts[i + 1].isdigit():
-                                    total_value = Decimal(cleaned_texts[i + 1] + '.00') 
-                                    break
-                            
-                    else:
-                        total_value = None
-                else:
-                    total_value = None
-                    
-    
-                if total_value is None and any(word in cleaned_texts for word in normalize_total):
-                    index_of_total = next((i for i, word in enumerate(cleaned_texts) if word in normalize_total), None)
+                # Determine total_value based on detected texts
+                if any(word in cleaned_texts for word in normalize_total):
+                    index_of_total = next(
+                        (i for i, word in enumerate(cleaned_texts) if word in normalize_total), None
+                    )
                     if index_of_total is not None and index_of_total + 1 < len(cleaned_texts):
                         word_after_total = cleaned_texts[index_of_total + 1]
                         cleaned_value = word_after_total.replace('$', '').replace(',', '').replace(' ', '').replace('s', '')
-                        
-                        if '.' in cleaned_value and cleaned_value.count('.') > 1:
-                         cleaned_value = cleaned_value.replace('.', '', cleaned_value.count('.') - 1)
-                        
                         try:
                             total_value = Decimal(cleaned_value)
                         except:
                             total_value = None
-                            
-                categories = Category.objects.all()
-                category_stores = {}
-                
-                for category in categories:
-                    stores_in_category = Store.objects.filter(category_id=category)
-                    category_stores[category.category] = [store.store.lower() for store in stores_in_category]
-                    
-                ocr_text = [word.lower() for word in cleaned_texts]
-                matched_store = []
-                matched_category = []
-                
-                store_matched = False
-               
-                for category, stores in category_stores.items():
-                    for store in stores:
-                        if any(store in text for text in ocr_text):
-                            matched_store.append(store.title())
-                            matched_category.append(category)
-                            store_matched = True
-                            break
-                        
-                if not store_matched:
-                    matched_store.append("Others")
-                    matched_category.append("Others")
-                    
-                matched_store_str = ", ".join(matched_store)
-                matched_category_str = ", ".join(matched_category)
-                
-                data = {
-                    'user_id': user_id,
-                    'file': image_file,
-                    'matched_store': matched_store_str,
-                    'matched_store_category': matched_category_str,
-                    'total_value': total_value,
-                }
-                
-                serializer = ExpenseSerializer(data=data)
-                if serializer.is_valid():
-                    serializer.save()
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                return Response({"error": f"OCR failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+                # Add bounding boxes and encode the image for saving
+                for detection in result:
+                    top_left = tuple(map(int, detection[0][0]))
+                    bottom_right = tuple(map(int, detection[0][2]))
+                    text = detection[1].replace('$', '')
+                    image = cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
+                    image = cv2.putText(image, text, top_left, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                _, img_encoded = cv2.imencode('.png', image)
+                image_filename = f"image_with_bounding_boxes_{get_random_string(8)}.png"
+                image_file = ContentFile(img_encoded.tobytes(), name=image_filename)
+
+            else:
+                # If no file, total_value can still be manually provided or remain None
+                image_file = None
+
+            # Find matched store and category
+            categories = Category.objects.all()
+            category_stores = {}
+            for category in categories:
+                stores_in_category = Store.objects.filter(category_id=category)
+                category_stores[category.category] = [store.store.lower() for store in stores_in_category]
+
+            ocr_text = [word.lower() for word in (cleaned_texts if file else [request.data.get('matched_store', '').lower()])]
+            for category, stores in category_stores.items():
+                print(f"Checking category: {category}, stores: {stores}")
+                for store in stores:
+                    if any(store in text for text in ocr_text):
+                        matched_store = [store.title()]
+                        matched_category = [category]
+                        print(f"Matched store: {matched_store}, category: {matched_category}")
+                        break
+
+            data = {
+                'user_id': user_id,
+                'file': image_file,
+                'matched_store': matched_store,
+                'matched_store_category': matched_category,
+                'total_value': Decimal(total_value) if total_value is not None else Decimal('0.00'),
+            }
+
+            serializer = ExpenseSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse(serializer.data, status=201)
+            return JsonResponse(serializer.errors, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
                     
       
     
