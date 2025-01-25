@@ -157,7 +157,7 @@ def expense_list(request, user_id):
             file = request.FILES.get('file')
             total_value = request.data.get('total_value', None)
             matched_store = request.data.get('matched_store', None)
-            matched_category = ["Others"]
+            matched_category = "Others"
             
             if file:
                 # OCR processing logic for the image file
