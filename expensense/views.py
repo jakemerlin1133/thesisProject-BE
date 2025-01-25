@@ -212,7 +212,7 @@ def expense_list(request, user_id):
                 for store in stores:
                     if any(store in text for text in ocr_text):
                         matched_store = [store.title()]
-                        matched_category = [category]
+                        matched_category = category
                         print(f"Matched store: {matched_store}, category: {matched_category}")
                         break
 
