@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
@@ -21,8 +23,9 @@ urlpatterns = [
     path('expense/<int:user_id>/', views.expense_list),
     path('expense/<int:user_id>/<int:id>/', views.expense_detail),
     path('expense/predict/<int:user_id>/', views.expense_prediction),
-    
-
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns = format_suffix_patterns(urlpatterns)

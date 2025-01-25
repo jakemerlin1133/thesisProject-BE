@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
+from django.conf import settings
 
 from .models import AppUser
 from .models import Category
@@ -77,5 +78,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
             if value is None:
                 raise serializers.ValidationError("User ID is required.")
             return value
+        
+        def to_representation(self, instance):
+            representation = super().to_representation(instance)
 
+            if instance.file:
+                file_url = instance.file.url 
+                representation['file'] = file_url
+            
+            return representation
     
