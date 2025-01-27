@@ -26,7 +26,7 @@ class Category(models.Model):
     category = models.CharField(max_length=20, unique=True) 
     
     def __str__(self):
-        return self.category   
+        return self.category
      
 class Store(models.Model):
     store = models.CharField(max_length=20, unique=True)
