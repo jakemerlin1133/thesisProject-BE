@@ -9,7 +9,6 @@ class AppUser(models.Model):
     last_name = models.CharField(max_length=24)
     birthdate = models.DateField()
     age = models.IntegerField()
-    position = models.CharField(max_length=30)
     email = models.EmailField()
     phone_number = models.CharField(max_length=11)
     uploaded_at = models.DateTimeField(auto_now_add=True)

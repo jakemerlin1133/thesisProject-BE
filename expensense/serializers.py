@@ -23,7 +23,6 @@ class AppUserSerializer(serializers.ModelSerializer):
             'last_name', 
             'birthdate', 
             'age', 
-            'position', 
             'email', 
             'phone_number',
             'uploaded_at',
