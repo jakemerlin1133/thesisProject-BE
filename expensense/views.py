@@ -46,7 +46,7 @@ def user_list(request):
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 def user_detail(request, id):
     
     try:
@@ -57,8 +57,8 @@ def user_detail(request, id):
     if request.method == 'GET':
        serializer = AppUserSerializer(user)
        return Response(serializer.data)
-    elif request.method == 'PUT':
-        serializer = AppUserSerializer(user, request.data)
+    elif request.method == 'PATCH':
+        serializer = AppUserSerializer(user, request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -84,7 +84,7 @@ def category_list(request):
            return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     
-@api_view(['GET', 'PUT', 'DELETE'])    
+@api_view(['GET', 'PATCH', 'DELETE'])    
 def category_detail(request, id):
     
     try:

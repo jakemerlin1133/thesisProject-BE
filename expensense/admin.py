@@ -6,7 +6,7 @@ from .models import Store
 from .models import Expense
 
 class AppUserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user_name', 'password', 'first_name', 'middle_name', 'last_name', 'birthdate', 'age', 'email', 'phone_number', 'uploaded_at', 'updated_at')
+    list_display = ('id', 'user_name', 'password', 'first_name', 'middle_name', 'last_name', 'birthdate', 'age', 'email', 'phone_number', 'uploaded_at', 'updated_at','guide_1','guide_2','guide_3')
 
 class ExpenseAdmin(admin.ModelAdmin):
     list_display = ('id', 'user_id', 'file', 'matched_store', 'matched_store_category', 'total_value', 'uploaded_at')

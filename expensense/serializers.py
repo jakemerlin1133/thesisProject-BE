@@ -27,10 +27,10 @@ class AppUserSerializer(serializers.ModelSerializer):
             'phone_number',
             'uploaded_at',
             'updated_at',
-             'last_login', 
-            'is_active',   
-            'is_staff',  
-            'is_superuser'
+            'last_login', 
+            'guide_1',   
+            'guide_2',  
+            'guide_3'
         ]
        
     def create(self, validated_data):
