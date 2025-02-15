@@ -44,4 +44,5 @@ torch==2.6.0
 torchvision==0.21.0
 typing_extensions==4.12.2
 tzdata==2025.1
+waitress==3.0.2
 whitenoise==6.9.0

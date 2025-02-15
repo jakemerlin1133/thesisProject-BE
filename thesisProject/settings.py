@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-yi+*x12#yfqm96mmerwj()y-f^&bc*xju7lybon=!^n*l4%k%i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['expensense-lqe0.onrender.com', '127.0.0.1', 'localhost', '192.168.18.10', '10.10.10.178', '192.168.181.41', '.vercel.app', '*']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -98,19 +98,16 @@ WSGI_APPLICATION = "thesisProject.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
 # DATABASES = {
-#     "default": dj_database_url.parse(
-#         "postgres://expensensedb_user:v09L5DxsjPWvl7huSMLmjtnYgQbgBCjm@dpg-cuo1hqij1k6c73922pc0-a.oregon-postgres.render.com/expensensedb",
-#         conn_max_age=600,
-#     )
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
 # }
+
+DATABASES = {
+    "default": dj_database_url.config(default=os.getenv("DATABASE_URL"))
+}
 
 
 # Password validation
@@ -148,10 +145,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-
-if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
