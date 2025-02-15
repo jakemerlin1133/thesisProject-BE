@@ -19,10 +19,17 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.http import HttpResponse
+
+# Simple homepage view
+def home(request):
+    return HttpResponse("Django is running!")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("expensense/", include("expensense.urls"))
+    path("expensense/", include("expensense.urls")),
+    path("", home),
+   
 ]
 
 urlpatterns += staticfiles_urlpatterns()
