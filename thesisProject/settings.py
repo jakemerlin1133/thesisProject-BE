@@ -106,7 +106,10 @@ WSGI_APPLICATION = "thesisProject.wsgi.application"
 # }
 
 DATABASES = {
-    "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
+    "default": dj_database_url.parse(
+        "postgres://expensensedb_user:v09L5DxsjPWvl7huSMLmjtnYgQbgBCjm@dpg-cuo1hqij1k6c73922pc0-a.oregon-postgres.render.com/expensensedb",
+        conn_max_age=600,
+    )
 }
 
 
