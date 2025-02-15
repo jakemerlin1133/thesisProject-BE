@@ -70,6 +70,21 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (for testing)
+
+# Alternatively, allow only specific domains:
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://192.168.18.10:8000",
+#     "https://thesisproject-be.onrender.com",
+# ]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+CORS_ALLOW_HEADERS = ["*"]
+
+
 # Session configuration
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_HTTPONLY = True
@@ -158,3 +173,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Increase file upload limit
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB max upload size
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
