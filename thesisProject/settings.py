@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "expensense",
     'corsheaders',
     "rest_framework",
-    'django_extensions',
     "rest_framework_simplejwt",
     "django.contrib.admin",
     "django.contrib.auth",
