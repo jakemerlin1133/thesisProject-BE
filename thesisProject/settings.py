@@ -98,19 +98,19 @@ WSGI_APPLICATION = "thesisProject.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 DATABASES = {
-    "default": dj_database_url.parse(
-        "postgres://expensensedb_user:v09L5DxsjPWvl7huSMLmjtnYgQbgBCjm@dpg-cuo1hqij1k6c73922pc0-a.oregon-postgres.render.com/expensensedb",
-        conn_max_age=600,
-    )
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
+
+# DATABASES = {
+#     "default": dj_database_url.parse(
+#         "postgres://expensensedb_user:v09L5DxsjPWvl7huSMLmjtnYgQbgBCjm@dpg-cuo1hqij1k6c73922pc0-a.oregon-postgres.render.com/expensensedb",
+#         conn_max_age=600,
+#     )
+# }
 
 
 # Password validation
