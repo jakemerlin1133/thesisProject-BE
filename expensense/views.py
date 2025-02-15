@@ -156,7 +156,7 @@ def expense_list(request, user_id):
             normalize_total = ["total", "tctal", "tofal", "tota"]
             file = request.FILES.get('file')
             total_value = request.data.get('total_value', None)
-            matched_store = request.data.get('matched_store', None)
+            matched_store = request.data.get('matched_store', "Others")
             matched_category = "Others"
             
             if file:
