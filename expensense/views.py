@@ -18,6 +18,7 @@ from rest_framework import status
 from django.http import JsonResponse
 
 import cv2
+import random
 import easyocr
 from django.conf import settings
 import numpy as np
@@ -264,7 +265,7 @@ def expense_detail(request, user_id, id):
 def expense_prediction(request, user_id):
     if request.method == "GET":
         try:
-            df = fetch_and_aggregate_expenses(user_id)
+            df, new_data_added = fetch_and_aggregate_expenses(user_id)
             
             if df.empty:
                 return Response({"Message": "No expenses found in the database. Prediction cannot be made."}, status=status.HTTP_200_OK)
@@ -274,9 +275,7 @@ def expense_prediction(request, user_id):
             
             model = train_model_on_aggregated_data(df)
             
-            predicted_expense = predict_next_month_total(model, df)
-            
-            predicted_expense = abs(predicted_expense)
+            predicted_expense = predict_next_month_total(model, df, new_data_added)
                         
              # Get the next month and year
             last_month_numeric = df['month_numeric'].max()
@@ -301,7 +300,7 @@ def expense_prediction(request, user_id):
                   
         
 def fetch_and_aggregate_expenses(user_id):
-        expenses = Expense.objects.filter(user_id=user_id)
+        expenses = Expense.objects.filter(user_id=user_id).order_by('-uploaded_at')
         data = [
             {
                 'total_value': expense.total_value,
@@ -312,20 +311,34 @@ def fetch_and_aggregate_expenses(user_id):
         df = pd.DataFrame(data)
         
         if df.empty:
-            return df
+            return df, False
 
         df['uploaded_at'] = pd.to_datetime(df['uploaded_at'])
         df['month'] = df['uploaded_at'].dt.month
         df['year'] = df['uploaded_at'].dt.year
+        df['month_numeric'] = df['year'] * 12 + df['month']
+
+        new_data_added = check_if_new_data_added(expenses)
         
         if len(df['month'].unique()) == 1:
-            # If only one month of data, do not aggregate and return the raw data
-            df['month_numeric'] = df['year'] * 12 + df['month']
-            return df
+           return df, new_data_added
 
         monthly_totals = df.groupby(['year', 'month'])['total_value'].sum().reset_index()
         monthly_totals['month_numeric'] = monthly_totals['year'] * 12 + monthly_totals['month']  
-        return monthly_totals
+        return monthly_totals, new_data_added
+
+
+def check_if_new_data_added(expenses):
+    """Check if the latest expense entry is new compared to previous ones."""
+    if not expenses:
+        return False
+    latest_expense = expenses.first()
+    last_uploaded_time = latest_expense.uploaded_at
+    
+    # Logic to determine if new data is added (you can adjust this condition based on your DB structure)
+    # Example: Check if the last uploaded time is recent (you can store last known timestamp somewhere)
+    return True  # Assume new data is added for now
+
     
 def train_model_on_aggregated_data(df):
     """Train a model on aggregated monthly totals."""
@@ -340,12 +353,16 @@ def train_model_on_aggregated_data(df):
     
     return model
 
-def predict_next_month_total(model, df):
-    """Predict the total expense for the next month."""
+def predict_next_month_total(model, df, new_data_added):
+    """Predict the total expense for the next month, applying randomization if new data is added."""
     last_month_numeric = df['month_numeric'].max()
     next_month_numeric = last_month_numeric + 1  # Increment to get the next month
-    prediction = model.predict([[next_month_numeric]])
-    return round(prediction[0], 2)
+    prediction = model.predict([[next_month_numeric]])[0]
+
+    if new_data_added:
+        prediction *= random.uniform(0.8, 1.2)
+
+    return round(abs(prediction), 2)
 
 
 @api_view(['POST'])
