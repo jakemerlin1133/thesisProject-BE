@@ -30,6 +30,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from datetime import datetime
+from django.core.cache import cache
 
 # USERS API
 @api_view(["GET", "POST"])
@@ -275,7 +276,7 @@ def expense_prediction(request, user_id):
             
             model = train_model_on_aggregated_data(df)
             
-            predicted_expense = predict_next_month_total(model, df, new_data_added)
+            predicted_expense = predict_next_month_total(model, df, user_id, new_data_added)
                         
              # Get the next month and year
             last_month_numeric = df['month_numeric'].max()
@@ -330,7 +331,7 @@ def fetch_and_aggregate_expenses(user_id):
 
 def check_if_new_data_added(expenses):
     """Check if the latest expense entry is new compared to previous ones."""
-    if not expenses:
+    if not expenses.exists():
         return False
     latest_expense = expenses.first()
     last_uploaded_time = latest_expense.uploaded_at
@@ -353,8 +354,16 @@ def train_model_on_aggregated_data(df):
     
     return model
 
-def predict_next_month_total(model, df, new_data_added):
+def predict_next_month_total(model, df, user_id, new_data_added):
     """Predict the total expense for the next month, applying randomization if new data is added."""
+
+    cache_key = f"predicted_expense_{user_id}"
+    
+    if not new_data_added:
+        cached_prediction = cache.get(cache_key)
+        if cached_prediction is not None:
+            return cached_prediction
+
     last_month_numeric = df['month_numeric'].max()
     next_month_numeric = last_month_numeric + 1  # Increment to get the next month
     prediction = model.predict([[next_month_numeric]])[0]
@@ -362,7 +371,11 @@ def predict_next_month_total(model, df, new_data_added):
     if new_data_added:
         prediction *= random.uniform(0.8, 1.2)
 
-    return round(abs(prediction), 2)
+    prediction = round(abs(prediction), 2)
+
+    cache.set(cache_key, prediction, timeout=None)
+
+    return prediction
 
 
 @api_view(['POST'])
