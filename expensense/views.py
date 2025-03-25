@@ -25,6 +25,7 @@ import numpy as np
 from decimal import Decimal
 from django.core.files.base import ContentFile
 from django.utils.crypto import get_random_string
+from fuzzywuzzy import fuzz, process
 
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -155,7 +156,7 @@ def expense_list(request, user_id):
     
     if request.method == "POST":
         try:
-            normalize_total = ["total", "tctal", "tofal", "tota"]
+            normalize_total = ["total", "tctal", "tofal", "tota", "tojal", "jotal", "total sales", "total sakes"]
             file = request.FILES.get('file')
             total_value = request.data.get('total_value', None)
             matched_store = request.data.get('matched_store', ["Others"])
@@ -168,8 +169,9 @@ def expense_list(request, user_id):
                 result = reader.readtext(image, detail=1, paragraph=False)
 
                 detected_texts = [detection[1].replace('$', '').lower() for detection in result]
+                print("Captured Texts:", detected_texts)
                 cleaned_texts = [
-                    word.replace(", uu", "").replace(".j0", "").rstrip('.,:;\'"-!?}]')
+                    word.replace(", uu", "").replace(".j0", "").replace(".d0", "").replace(".do", "").rstrip('.,:;\'"-!?}]')
                     for word in detected_texts
                 ]
 
@@ -209,14 +211,12 @@ def expense_list(request, user_id):
                 category_stores[category.category] = [store.store.lower() for store in stores_in_category]
 
             ocr_text = [word.lower() for word in (cleaned_texts if file else [request.data.get('matched_store', '').lower()])]
-            for category, stores in category_stores.items():
-                print(f"Checking category: {category}, stores: {stores}")
-                for store in stores:
-                    if any(store in text for text in ocr_text):
-                        matched_store = [store.title()]
-                        matched_category = category
-                        print(f"Matched store: {matched_store}, category: {matched_category}")
-                        break
+            for category, stores in category_stores.items(): 
+                best_match = process.extractOne(' '.join(ocr_text), stores, scorer=fuzz.partial_ratio)
+                if best_match and best_match[1] > 70: 
+                    matched_store = [best_match[0].title()]
+                    matched_category = category
+                    break
 
             data = {
                 'user_id': user_id,
