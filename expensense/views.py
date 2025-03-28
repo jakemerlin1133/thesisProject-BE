@@ -156,7 +156,7 @@ def expense_list(request, user_id):
     
     if request.method == "POST":
         try:
-            normalize_total = ["total", "tctal", "tofal", "tota", "tojal", "jotal", "total sales", "total sakes"]
+            normalize_total = ["total", "tctal", "tofal", "tota", "tojal", "jotal", "total sales", "total sakes", "total salts"]
             file = request.FILES.get('file')
             total_value = request.data.get('total_value', None)
             matched_store = request.data.get('matched_store', ["Others"])
