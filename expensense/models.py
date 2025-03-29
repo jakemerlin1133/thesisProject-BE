@@ -38,7 +38,7 @@ class Expense(models.Model):
     file = models.FileField(null=True, blank=True)
     matched_store =  models.JSONField(null=True, blank=True)
     matched_store_category =  models.JSONField(null=True, blank=True)
-    total_value = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_value = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
